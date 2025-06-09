@@ -129,8 +129,9 @@ PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml
 
 ifeq ($(TARGET_TEGRA_AUDIO),tinyhal)
+PRODUCT_SOONG_NAMESPACES += external/tinyhal
 PRODUCT_PACKAGES += \
-    audio.primary.tegra
+    audio.primary.tinyhal
 endif
 endif
 
@@ -316,7 +317,7 @@ endif
 else ifneq ($(filter $(TARGET_TEGRA_POWER), aosp lineage),)
 TARGET_POWERHAL_VARIANT := tegra
 PRODUCT_PACKAGES += \
-    vendor.nvidia.hardware.power@1.0-service
+    android.hardware.power-service-nvidia
 endif
 
 # Vendor seccomp policy files for media components:
