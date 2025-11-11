@@ -29,16 +29,18 @@ TARGET_TEGRA_MEMTRACK ?= lineage
 TARGET_TEGRA_POWER    ?= aosp
 
 ifeq ($(TARGET_TEGRA_MAN_LVL),)
-ifeq ($(TARGET_TEGRA_KERNEL),4.9)
+ifeq ($(TARGET_KERNEL_VERSION),4.9)
 TARGET_TEGRA_MAN_LVL := 5
-else ifeq ($(TARGET_TEGRA_KERNEL),5.10)
+else ifeq ($(TARGET_KERNEL_VERSION),5.10)
 TARGET_TEGRA_MAN_LVL := 6
-else ifeq ($(TARGET_TEGRA_KERNEL),5.15)
+else ifeq ($(TARGET_KERNEL_VERSION),5.15)
 TARGET_TEGRA_MAN_LVL := 7
-else ifeq ($(TARGET_TEGRA_KERNEL),6.1)
+else ifeq ($(TARGET_KERNEL_VERSION),6.1)
 TARGET_TEGRA_MAN_LVL := 8
-else ifeq ($(TARGET_TEGRA_KERNEL),6.6)
+else ifeq ($(TARGET_KERNEL_VERSION),6.6)
 TARGET_TEGRA_MAN_LVL := 202404
+else ifeq ($(TARGET_KERNEL_VERSION),6.12)
+TARGET_TEGRA_MAN_LVL := 202504
 endif
 endif
 
@@ -91,7 +93,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.usb.accessory.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.usb.accessory.xml \
     frameworks/native/data/etc/android.hardware.usb.host.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.usb.host.xml \
-    frameworks/native/data/etc/android.software.app_widgets.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.app_widgets.xml
+    frameworks/native/data/etc/android.software.app_widgets.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.app_widgets.xml \
+    frameworks/native/data/etc/android.software.midi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.midi.xml
 
 # Audio
 TARGET_EXCLUDES_AUDIOFX := true
@@ -129,8 +132,9 @@ PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml
 
 ifeq ($(TARGET_TEGRA_AUDIO),tinyhal)
+PRODUCT_SOONG_NAMESPACES += external/tinyhal
 PRODUCT_PACKAGES += \
-    audio.primary.tegra
+    audio.primary.tinyhal
 endif
 endif
 
@@ -141,6 +145,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.bluetooth_le.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.bluetooth_le.xml
 
 ifneq ($(filter bcm, $(TARGET_TEGRA_BT)),)
+PRODUCT_SOONG_NAMESPACES += hardware/broadcom/libbt
 PRODUCT_PACKAGES += \
     libbt-vendor \
     android.hardware.bluetooth@1.1-service
@@ -152,10 +157,13 @@ endif
 endif
 
 ifneq ($(filter btlinux, $(TARGET_TEGRA_BT)),)
-PRODUCT_COPY_FILES += \
-    device/nvidia/tegra-common/comms/android.hardware.bluetooth-service.default-tegra.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/android.hardware.bluetooth-service.default-tegra.rc
+ifeq ($(TARGET_TEGRA_BT),btlinux)
 PRODUCT_PACKAGES += \
     android.hardware.bluetooth-service.default
+else
+PRODUCT_PACKAGES += \
+    android.hardware.bluetooth-service.tegra
+endif
 endif
 endif
 
@@ -165,6 +173,17 @@ AB_OTA_UPDATER := false
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 else
 AB_OTA_UPDATER := true
+ifeq ($(shell expr $(TARGET_TEGRA_MAN_LVL) \>= 8), 1)
+ifeq ($(TARGET_TEGRA_BOOTCTRL),smd)
+PRODUCT_PACKAGES += \
+    android.hardware.boot-service.nvidia \
+    android.hardware.boot-service.nvidia.recovery
+else ifeq ($(TARGET_TEGRA_BOOTCTRL),efi)
+PRODUCT_PACKAGES += \
+    android.hardware.boot-service.nvidia-efi \
+    android.hardware.boot-service.nvidia-efi.recovery
+endif
+else
 PRODUCT_PACKAGES += \
     android.hardware.boot@1.0-service
 PRODUCT_PACKAGES_DEBUG += \
@@ -178,6 +197,7 @@ else ifeq ($(TARGET_TEGRA_BOOTCTRL),efi)
 PRODUCT_PACKAGES += \
     android.hardware.boot@1.0-impl.nvidia-efi \
     android.hardware.boot@1.0-impl.nvidia-efi.recovery
+endif
 endif
 endif
 
@@ -202,7 +222,7 @@ endif
 
 # DRM
 PRODUCT_PACKAGES += \
-    android.hardware.drm-service.clearkey
+    android.hardware.drm@latest-service.clearkey
 
 # fastbootd
 PRODUCT_PACKAGES += \
@@ -272,13 +292,8 @@ endif
 
 # Memtrack
 ifeq ($(TARGET_TEGRA_MEMTRACK),lineage)
-ifeq ($(shell expr $(TARGET_TEGRA_MAN_LVL) \>= 6), 1)
 PRODUCT_PACKAGES += \
     android.hardware.memtrack-service-nvidia
-else
-PRODUCT_PACKAGES += \
-    android.hardware.memtrack@1.0-service-nvidia
-endif
 endif
 
 # OMX
@@ -316,7 +331,7 @@ endif
 else ifneq ($(filter $(TARGET_TEGRA_POWER), aosp lineage),)
 TARGET_POWERHAL_VARIANT := tegra
 PRODUCT_PACKAGES += \
-    vendor.nvidia.hardware.power@1.0-service
+    android.hardware.power-service-nvidia
 endif
 
 # Vendor seccomp policy files for media components:
@@ -334,6 +349,10 @@ PRODUCT_PACKAGES += \
 TARGET_TEGRA_SENSOR_FEATURES ?= accelerometer gyroscope
 PRODUCT_COPY_FILES += \
     $(foreach feature,$(TARGET_TEGRA_SENSOR_FEATURES),frameworks/native/data/etc/android.hardware.sensor.$(feature).xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.$(feature).xml)
+
+ifneq ($(filter iio, $(TARGET_TEGRA_SENSORS)),)
+PRODUCT_SOONG_NAMESPACES += hardware/intel/sensors-iio
+endif
 endif
 
 # Thermal
@@ -371,8 +390,10 @@ PRODUCT_PACKAGES_DEBUG += \
 endif
 
 # USB
+ifeq ($(shell expr $(TARGET_TEGRA_MAN_LVL) \<= 7), 1)
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.3-service.basic
+endif
 
 # Wifi
 ifneq ($(TARGET_TEGRA_WIFI),)

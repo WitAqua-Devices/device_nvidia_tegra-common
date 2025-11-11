@@ -1,3 +1,9 @@
+# Audio
+ifeq ($(TARGET_TEGRA_AUDIO),tinyhal)
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.hardware.audio.primary=tinyhal
+endif
+
 # Bluetooth
 ifneq ($(TARGET_TEGRA_BT),)
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -74,7 +80,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 endif
 
 # USB
-ifneq ($(filter $(TARGET_TEGRA_KERNEL), 3.4 3.10),)
+ifneq ($(filter $(TARGET_KERNEL_VERSION), 3.4 3.10),)
 PRODUCT_PROPERTY_OVERRIDES += \
     sys.usb.ffs.aio_compat=1 \
     persist.adb.nonblocking_ffs=0 \

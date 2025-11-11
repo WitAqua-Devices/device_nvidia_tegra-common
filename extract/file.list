@@ -2,8 +2,8 @@
 stock-t210	system/system/app/NvAudioSvc/NvAudioSvc.apk		audio/app/
 stock-t210	vendor/app/DolbyAudioService/DolbyAudioService.apk	audio/app/
 stock-t210	vendor/bin/hw/android.hardware.audio@6.0-service-msd	audio/bin32/hw/
-stock-t210	vendor/lib/hw/audio.primary.tegra.so			audio/lib/hw/audio.primary.tegra.dolby.so
-stock-foster	vendor/lib/hw/audio.primary.tegra.so			audio/lib/hw/
+stock-t210	vendor/lib/hw/audio.primary.tegra.so			audio/dolby/lib/hw/
+stock-foster	vendor/lib/hw/audio.primary.tegra.so			audio/nodolby/lib/hw/
 stock-t210	vendor/lib/hw/sound_trigger.primary.tegra.so		audio/lib/hw/
 stock-t210	vendor/lib/soundfx/libnvvisualizer.so			audio/lib/soundfx/
 stock-t210	vendor/lib/libim501.so					audio/lib/
@@ -96,8 +96,8 @@ stock-t210	vendor/lib64/libnvddk_2d_v2.so						nvgpu/lib64/
 stock-t210	vendor/lib64/libnvddk_vic.so						nvgpu/lib64/
 stock-t210	vendor/lib64/libnvglsi.so						nvgpu/lib64/
 stock-t210	vendor/lib64/libnvgr.so							nvgpu/lib64/
-stock-t210	vendor/lib64/libnvhwcomposer.so						nvgpu/lib64/libnvhwcomposer.dolby.so
-stock-foster	vendor/lib64/libnvhwcomposer.so						nvgpu/lib64/
+stock-t210	vendor/lib64/libnvhwcomposer.so						nvgpu/dolby/lib64/
+stock-foster	vendor/lib64/libnvhwcomposer.so						nvgpu/nodolby/lib64/
 stock-t210	vendor/lib64/libnvidia-glvkspirv.so					nvgpu/lib64/
 stock-t210	vendor/lib64/libnvidia-ptxjitcompiler.so				nvgpu/lib64/
 stock-t210	vendor/lib64/libnvrmapi_tegra.so					nvgpu/lib64/
@@ -131,7 +131,7 @@ stock-t210	vendor/lib/libnvddk_2d_v2.so						nvgpu/lib/
 stock-t210	vendor/lib/libnvddk_vic.so						nvgpu/lib/
 stock-t210	vendor/lib/libnvglsi.so							nvgpu/lib/
 stock-t210	vendor/lib/libnvgr.so							nvgpu/lib/
-stock-sif	vendor/lib/libnvhwcomposer.so						nvgpu/lib/libnvhwcomposer.dolby.so
+stock-sif	vendor/lib/libnvhwcomposer.so						nvgpu/dolby/lib/
 stock-t210	vendor/lib/libnvidia-glvkspirv.so					nvgpu/lib/
 stock-t210	vendor/lib/libnvidia-ptxjitcompiler.so					nvgpu/lib/
 stock-t210	vendor/lib/libnvrmapi_tegra.so						nvgpu/lib/
@@ -157,8 +157,8 @@ stock-t210	vendor/lib/libnvsi_ll_2.so						nvgpu/lib/
 
 # NVMM
 stock-t210	vendor/lib/libnvomxilclient.so		nvmm/lib/
-stock-t210	vendor/lib/libnvomx.so			nvmm/lib/libnvomx.dolby.so
-stock-foster	vendor/lib/libnvomx.so			nvmm/lib/
+stock-t210	vendor/lib/libnvomx.so			nvmm/dolby/lib/
+stock-foster	vendor/lib/libnvomx.so			nvmm/nodolby/lib/
 stock-t210	vendor/lib/libnvmm_audio.so		nvmm/lib/
 stock-t210	vendor/lib/libnvmm_contentpipe.so	nvmm/lib/
 stock-t210	vendor/lib/libnvmmlite_audio.so		nvmm/lib/
@@ -166,8 +166,8 @@ stock-t210	vendor/lib/libnvmmlite_image.so		nvmm/lib/
 stock-t210	vendor/lib/libnvmmlite.so		nvmm/lib/
 stock-t210	vendor/lib/libnvmmlite_msaudio.so	nvmm/lib/
 stock-t210	vendor/lib/libnvmmlite_utils.so		nvmm/lib/
-stock-t210	vendor/lib/libnvmmlite_video.so		nvmm/lib/libnvmmlite_video.dolby.so
-stock-foster	vendor/lib/libnvmmlite_video.so		nvmm/lib/
+stock-t210	vendor/lib/libnvmmlite_video.so		nvmm/dolby/lib/
+stock-foster	vendor/lib/libnvmmlite_video.so		nvmm/nodolby/lib/
 stock-t210	vendor/lib/libnvmm_parser.so		nvmm/lib/
 stock-t210	vendor/lib/libnvmm.so			nvmm/lib/
 stock-t210	vendor/lib/libnvmm_msaudio.so		nvmm/lib/
@@ -178,17 +178,17 @@ stock-t210	vendor/lib/libnvtvmr.so			nvmm/lib/
 stock-t210	vendor/lib/libnvtnr.so			nvmm/lib/
 stock-t210	vendor/lib/libnvparser.so		nvmm/lib/
 stock-t210	vendor/lib/libnvavp.so			nvmm/lib/
-stock-t210	vendor/lib/libstagefrighthw.so		nvmm/lib/libstagefrighthw.dolby.so
-stock-foster	vendor/lib/libstagefrighthw.so		nvmm/lib/
+stock-t210	vendor/lib/libstagefrighthw.so		nvmm/dolby/lib/
+stock-foster	vendor/lib/libstagefrighthw.so		nvmm/nodolby/lib/
 stock-t210	vendor/lib/libnvdla_runtime.so		nvmm/lib/
-stock-t210	vendor/lib64/libnvomx.so		nvmm/lib64/libnvomx.dolby.so
-stock-foster	vendor/lib64/libnvomx.so		nvmm/lib64/
+stock-t210	vendor/lib64/libnvomx.so		nvmm/dolby/lib64/
+stock-foster	vendor/lib64/libnvomx.so		nvmm/nodolby/lib64/
 stock-t210	vendor/lib64/libnvmm_contentpipe.so	nvmm/lib64/
 stock-t210	vendor/lib64/libnvmmlite_image.so	nvmm/lib64/
 stock-t210	vendor/lib64/libnvmmlite.so		nvmm/lib64/
 stock-t210	vendor/lib64/libnvmmlite_utils.so	nvmm/lib64/
-stock-t210	vendor/lib64/libnvmmlite_video.so	nvmm/lib64/libnvmmlite_video.dolby.so
-stock-foster	vendor/lib64/libnvmmlite_video.so	nvmm/lib64/
+stock-t210	vendor/lib64/libnvmmlite_video.so	nvmm/dolby/lib64/
+stock-foster	vendor/lib64/libnvmmlite_video.so	nvmm/nodolby/lib64/
 stock-t210	vendor/lib64/libnvmm_parser.so		nvmm/lib64/
 stock-t210	vendor/lib64/libnvmm.so			nvmm/lib64/
 stock-t210	vendor/lib64/libnvmm_utils.so		nvmm/lib64/
@@ -264,6 +264,19 @@ l4t-t194	bootloader/BUP_generator.py			tegraflash/
 l4t-t234	bootloader/BUP_generator.py			tegraflash/
 
 # Tegraflash
+l4t-t186	bootloader/tegraflash.py		tegraflash/
+l4t-t186	bootloader/tegraflash_internal.py	tegraflash/
+l4t-t186	bootloader/sw_memcfg_overlay.pl		tegraflash/
+l4t-t186	bootloader/tegrabct_v2			tegraflash/
+l4t-t186	bootloader/tegradevflash_v2		tegraflash/
+l4t-t186	bootloader/tegrahost_v2			tegraflash/
+l4t-t186	bootloader/tegraparser_v2		tegraflash/
+l4t-t186	bootloader/tegrarcm_v2			tegraflash/
+l4t-t186	bootloader/tegrasign_v2			tegraflash/
+l4t-t186	bootloader/tegrasign_v3.py		tegraflash/
+l4t-t186	bootloader/tegrasign_v3_internal.py	tegraflash/
+l4t-t186	bootloader/tegrasign_v3_util.py		tegraflash/
+l4t-t186	bootloader/tegraopenssl			tegraflash/
 l4t-t194	bootloader/tegraflash.py		tegraflash/
 l4t-t194	bootloader/tegraflash_impl_t234.py	tegraflash/
 l4t-t194	bootloader/tegraflash_internal.py	tegraflash/
@@ -305,7 +318,9 @@ l4t-t234	bootloader/tegraparser_v2		tegraflash/
 l4t-t234	bootloader/tegrarcm_v2			tegraflash/
 l4t-t234	bootloader/tegrasign_v2			tegraflash/
 l4t-t234	bootloader/tegrasign_v3.py		tegraflash/
+l4t-t234	bootloader/tegrasign_v3_hsm.py		tegraflash/
 l4t-t234	bootloader/tegrasign_v3_internal.py	tegraflash/
+l4t-t234	bootloader/tegrasign_v3_softhsm.py	tegraflash/
 l4t-t234	bootloader/tegrasign_v3_util.py		tegraflash/
 l4t-t234	bootloader/tegraopenssl			tegraflash/
 
@@ -338,6 +353,9 @@ stock-t210	bmp/verity_eio_continue_1080.bmp	BMP/
 
 # Wireless
 # Realtek
+l4t-t186	drivers/lib/firmware/rtl8822cu_config		realtek/rtl8822cu/
+l4t-t186	drivers/lib/firmware/rtl8822cu_fw		realtek/rtl8822cu/
+l4t-t186	drivers/lib/firmware/rtl8822_setting.bin	realtek/rtl8822cu/
 l4t-t194	drivers/lib/firmware/rtl8822cu_config		realtek/rtl8822cu/
 l4t-t194	drivers/lib/firmware/rtl8822cu_fw		realtek/rtl8822cu/
 l4t-t194	drivers/lib/firmware/rtl8822_setting.bin	realtek/rtl8822cu/
@@ -354,9 +372,9 @@ stock-t210	vendor/firmware/fw_bcmdhd.bin		bcm/bcm4354/sdio-ag-p2p-pno-aoe-pktfil
 stock-t210	vendor/firmware/brcmfmac4356-pcie.bin	bcm/bcm4356/
 
 # NvPModel
-l4t-t194	nv_tegra/l4t_deb_packages/nvidia-l4t-nvpmodel_35.5.0-20240219203809_arm64.deb	nvpmodel/nvidia-l4t-nvpmodel_arm64.deb
-l4t-t194	drivers/usr/lib/aarch64-linux-gnu/tegra/libnvos.so				l4t/lib64/
-l4t-t194	drivers/usr/lib/aarch64-linux-gnu/tegra/libnvsocsys.so				l4t/lib64/
-l4t-t234	nv_tegra/l4t_deb_packages/nvidia-l4t-nvpmodel_36.4.3-20250107174145_arm64.deb	nvpmodel/nvidia-l4t-nvpmodel_arm64.deb
-l4t-t234	drivers/usr/lib/aarch64-linux-gnu/tegra/libnvos.so				l4t/lib64/
-l4t-t234	drivers/usr/lib/aarch64-linux-gnu/tegra/libnvsocsys.so				l4t/lib64/
+l4t-t194	nv_tegra/l4t_deb_packages/nvidia-l4t-nvpmodel_35.6.2-20250515185434_arm64.deb	nvpmodel/nvidia-l4t-nvpmodel_arm64.deb
+l4t-t194	drivers/usr/lib/aarch64-linux-gnu/tegra/libnvos.so				l4t/lib64/libnvos-l4t.so
+l4t-t194	drivers/usr/lib/aarch64-linux-gnu/tegra/libnvsocsys.so				l4t/lib64/libnvsocsys-l4t.so
+l4t-t234	nv_tegra/l4t_deb_packages/nvidia-l4t-nvpmodel_36.4.4-20250616085344_arm64.deb	nvpmodel/nvidia-l4t-nvpmodel_arm64.deb
+l4t-t234	drivers/usr/lib/aarch64-linux-gnu/tegra/libnvos.so				l4t/lib64/libnvos-l4t.so
+l4t-t234	drivers/usr/lib/aarch64-linux-gnu/tegra/libnvsocsys.so				l4t/lib64/libnvsocsys-l4t.so

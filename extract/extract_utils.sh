@@ -15,11 +15,14 @@
 # limitations under the License.
 #
 
+shopt -s extglob;
+
 declare -a SOURCE_PATHS=();
 declare -A SOURCE_BRANCH=();
 declare -a FILELIST_PATHS=();
 declare -a PATCH_PATHS=();
 declare -a HOOK_PATHS=();
+declare -A MODULES=();
 
 VENDOR_STATE=-1
 
@@ -173,7 +176,7 @@ function fetch_sources() {
             fi;
             if [ ! -f ${TMPDIR}/downloads/${sname}.${fileext} ]; then
                 echo -n "Downloading source ${sname} from ${url}...";
-                wget ${url} -O ${TMPDIR}/downloads/${sname}.${fileext} 1>/dev/null 2>&1;
+                wget ${url} -O ${TMPDIR}/downloads/${sname}.${fileext} --retry-on-http-error=429 --wait 10 --random-wait 1>/dev/null 2>&1;
 
                 if [ "${type}" == "gitiles" ]; then
                     mv ${TMPDIR}/downloads/${sname}.sh ${TMPDIR}/downloads/${sname}.base64;
@@ -208,7 +211,7 @@ function fetch_sources() {
                 tar -xf ${TMPDIR}/downloads/${sname}.tbz2 -C ${ESPATH} 1>/dev/null 2>&1;
                 mv ${ESPATH}/Linux_for_Tegra/* ${ESPATH}/;
                 rmdir ${ESPATH}/Linux_for_Tegra;
-                tar -xf ${ESPATH}/nv_tegra/nvidia_drivers.tbz2 -C ${ESPATH}/drivers 1>/dev/null 2>&1;
+                tar -xf ${ESPATH}/nv_tegra/nvidia_drivers.tbz2 -C ${ESPATH}/drivers 1>/dev/null 2>&1 || true;
             elif [ "${type}" == "blob" ]; then
                 # Only extract blob
                 unzip -d ${ESPATH} ${TMPDIR}/downloads/${sname}.zip blob 1>/dev/null 2>&1 || \
@@ -328,7 +331,7 @@ function fetch_sources() {
         while read -r sname source dest; do
             if [ "${sname}" == "external" ]; then
                 mkdir -p ${TMPDIR}/extract/external;
-                if ! wget -q "${source}" -O $(realpath ${TMPDIR}/extract/external/$(basename ${dest})); then
+                if ! wget -q "${source}" -O $(realpath ${TMPDIR}/extract/external/$(basename ${dest})) --retry-on-http-error=429 --wait 10 --random-wait; then
                     echo "";
                     echo "Failed to download ${source}";
                     exit 1;
@@ -388,6 +391,18 @@ function copy_files() {
                 else
                     cp ${EXTRACTDIR}/${sname}/${source} ${LINEAGE_ROOT}/vendor/${project}/${SOURCE_BRANCH[$sname]}/${dest};
                 fi;
+
+                if [ "${dest%%/*}" != "BCT" -a "${dest%%/*}" != "firmware" ]; then
+                    elffmt=$(llvm-objdump -a "${LINEAGE_ROOT}/vendor/${project}/${SOURCE_BRANCH[$sname]}/${dest}" 2>/dev/null | sed -nE "s|^.+file format (.*)$|\1|p");
+                    if [ "${elffmt}" == "elf64-littleaarch64" -o "${elffmt}" == "elf32-littlearm" -o "${dest#*.}" == "apk" -o "${dest#*.}" == "sh" -o "${dest#*.}" == "xml" ]; then
+                        dolbypath=${dest#*/};
+                        if [ "${dolbypath%%/*}" == "dolby" -o "${dolbypath%%/*}" == "nodolby" ]; then
+                            MODULES[${project}/${SOURCE_BRANCH[$sname]}/${dest%%/*}/${dolbypath%%/*}]+="${dolbypath#*/} ";
+                        else
+                            MODULES[${project}/${SOURCE_BRANCH[$sname]}/${dest%%/*}]+="${dest#*/} ";
+                        fi;
+                    fi;
+                fi;
             elif [ "${sname}" == "external" -a -f "${EXTRACTDIR}/external/$(basename ${dest})" ]; then
                 echo "  * ${project}/external/${dest}";
                 mkdir -p ${LINEAGE_ROOT}/vendor/$(dirname ${project}/external/$dest);
@@ -411,6 +426,84 @@ function copy_files() {
     fi;
 
     echo "Finished copying files.";
+}
+
+#
+# Write blueprint makefiles
+#
+function write_makefiles() {
+    echo "Writing makefiles...";
+
+    for key in "${!MODULES[@]}"; do
+        bp_dir=$(echo ${key} |awk -F/ '{ print $1"/"$2 }');
+        bp_path=${LINEAGE_ROOT}/vendor/${bp_dir}/Android.bp;
+        if [ ! -f ${bp_path} ]; then
+            echo "soong_namespace {" >> ${bp_path};
+            echo "}" >> ${bp_path};
+        fi;
+        exclude_path=${LINEAGE_ROOT}/vendor/${bp_dir}/exclude-bp.mk;
+        if [ ! -f ${exclude_path} ]; then
+            echo "PRODUCT_SOURCE_ROOT_DIRS += -vendor/${bp_dir}" >> ${exclude_path};
+            for key2 in "${!FILELIST_PATHS[@]}"; do
+                local project="${FILELIST_PATHS["$key2"]}";
+                if [ "${project}" == "nvidia/tegra-common" ]; then
+                    project="nvidia/common";
+                else
+                    project=${project%"-common"};
+                fi;
+                if [ "${project}" == "${bp_dir}" ]; then
+                    echo "PRODUCT_SOURCE_ROOT_DIRS += -device/${FILELIST_PATHS["$key2"]}/vendor" >> ${exclude_path};
+                    break;
+                fi;
+            done;
+        fi;
+
+        bp_path=${LINEAGE_ROOT}/vendor/${key}/Android.bp;
+        values=(${MODULES[$key]});
+        for file in "${values[@]}"; do
+            elffmt=$(llvm-objdump -a "${LINEAGE_ROOT}/vendor/${key}/${file}" 2>/dev/null | sed -nE "s|^.+file format (.*)$|\1|p");
+            filenp=$(basename ${file%*/});
+            if [ "${elffmt}" == "elf64-littleaarch64" ]; then
+                echo "filegroup {" >> ${bp_path};
+                echo "  name: \"${filenp%.@(so)}_64-srcs\"," >> ${bp_path};
+                echo "  srcs: [\"${file}\"]," >> ${bp_path};
+                echo "}" >> ${bp_path};
+                echo >> ${bp_path};
+                echo "cc_defaults {" >> ${bp_path};
+                echo "  name: \"${filenp%.@(so)}_64-defaults\"," >> ${bp_path};
+                echo "  target: {" >> ${bp_path};
+                echo "    android_arm64: {" >> ${bp_path};
+                echo "      srcs: [\":${filenp%.@(so)}_64-srcs\"]," >> ${bp_path};
+                echo "      shared_libs: [$(llvm-objdump -p "${LINEAGE_ROOT}/vendor/${key}/${file}" 2>/dev/null | sed 's/libprotobuf-cpp-lite-3.9.1/libprotobuf-cpp-lite-3.9.1-vendorcompat/' | sed -n 's/^\s*NEEDED\s*\(.*\)/\1/p' | sed 's/\.so$//' | sed 's/\(.\+\)/"\1",/g' | tr '\n' ' ')]," >> ${bp_path};
+                echo "    }," >> ${bp_path};
+                echo "  }," >> ${bp_path};
+                echo "}" >> ${bp_path};
+            elif [ "${elffmt}" == "elf32-littlearm" ]; then
+                echo "filegroup {" >> ${bp_path};
+                echo "  name: \"${filenp%.@(so)}_32-srcs\"," >> ${bp_path};
+                echo "  srcs: [\"${file}\"]," >> ${bp_path};
+                echo "}" >> ${bp_path};
+                echo >> ${bp_path};
+                echo "cc_defaults {" >> ${bp_path};
+                echo "  name: \"${filenp%.@(so)}_32-defaults\"," >> ${bp_path};
+                echo "  target: {" >> ${bp_path};
+                echo "    android_arm: {" >> ${bp_path};
+                echo "      srcs: [\":${filenp%.@(so)}_32-srcs\"]," >> ${bp_path};
+                echo "      shared_libs: [$(llvm-objdump -p "${LINEAGE_ROOT}/vendor/${key}/${file}" 2>/dev/null | sed 's/libprotobuf-cpp-lite-3.9.1/libprotobuf-cpp-lite-3.9.1-vendorcompat/' | sed -n 's/^\s*NEEDED\s*\(.*\)/\1/p' | sed 's/\.so$//' | sed 's/\(.\+\)/"\1",/g' | tr '\n' ' ')]," >> ${bp_path};
+                echo "    }," >> ${bp_path};
+                echo "  }," >> ${bp_path};
+                echo "}" >> ${bp_path};
+            else
+                echo "filegroup {" >> ${bp_path};
+                echo "  name: \"${filenp%.@(apk|blkz|sh|srm|xml)}-srcs\"," >> ${bp_path};
+                echo "  srcs: [\"${file}\"]," >> ${bp_path};
+                echo "}" >> ${bp_path};
+            fi;
+            echo >> ${bp_path};
+        done;
+    done;
+
+    echo "Finished writing makefiles...";
 }
 
 #
@@ -486,4 +579,5 @@ function extract() {
     fetch_sources $SRC;
     copy_files;
     do_patches;
+    write_makefiles;
 }

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 ifneq ($(TARGET_TEGRA_VERSION),)
-ATF_PATH ?= external/arm-trusted-firmware
-ATF_CROSS_COMPILE ?= CROSS_COMPILE="$(CCACHE_BIN) $(KERNEL_TOOLCHAIN)/$(KERNEL_TOOLCHAIN_PREFIX)"
+ATF_PATH ?= hardware/nvidia/arm-trusted-firmware
+ATF_CROSS_COMPILE ?= CROSS_COMPILE="$(KERNEL_TOOLCHAIN)/$(KERNEL_TOOLCHAIN_PREFIX)"
 
 # 1: Intermediates dir
 # 2: Target base filename

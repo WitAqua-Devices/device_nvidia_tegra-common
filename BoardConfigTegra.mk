@@ -22,9 +22,6 @@ ifneq ($(TARGET_TEGRA_AUDIO),)
 ifeq ($(filter audio, $(TARGET_TEGRA_DOLBY)),)
 DEVICE_MANIFEST_FILE += device/nvidia/tegra-common/manifests/audio.xml
 endif
-ifeq ($(TARGET_TEGRA_AUDIO),tinyhal)
-BOARD_USES_TINYHAL_AUDIO := true
-endif
 endif
 
 # Bluetooth
@@ -33,13 +30,18 @@ BOARD_HAVE_BLUETOOTH := true
 
 ifneq ($(filter bcm, $(TARGET_TEGRA_BT)),)
 BOARD_HAVE_BLUETOOTH_BCM := true
+endif
+# Don't include on multi-variant builds
+ifeq ($(TARGET_TEGRA_BT),bcm)
 DEVICE_MANIFEST_FILE += device/nvidia/tegra-common/manifests/bluetooth.xml
 endif
 endif
 
 # Boot Control
 ifneq ($(TARGET_TEGRA_BOOTCTRL),)
+ifeq ($(shell expr $(TARGET_TEGRA_MAN_LVL) \< 8), 1)
 DEVICE_MANIFEST_FILE += device/nvidia/tegra-common/manifests/boot.xml
+endif
 endif
 
 # CEC
