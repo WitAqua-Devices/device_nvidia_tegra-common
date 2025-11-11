@@ -8,7 +8,7 @@
    "target_path": "hardware/dolby/interfaces"
  },
  {
-   "repository": "android_hardware_nvidia_arm-trusted-firmware",
+   "repository": "hardware_nvidia_arm-trusted-firmware",
    "target_path": "hardware/nvidia/arm-trusted-firmware"
  }
 ]
